@@ -1,0 +1,16 @@
+1. Write assembler in pure C
+	Can start with demo in C++ or Python, but for portability needs to be
+		written in pure C
+2. Write compiler in ANY LANGUAGE
+	Only goal is to translate pure C into custom assembly
+	Assembler executable can take pure C into the my machine code
+3. Use compiler and assembler executable to compile assembler into my machine code
+
+THEN can write and run assembly code!
+
+4. Re-do compiler in pure C, will translate pure C to assembly
+	Compile the compiler using gcc, then run the executable on the source code
+		Will return a assembly file, can assemble to get executable on CPU
+		Using that executable on CPU, can re-compile the source of compiler
+
+5. Then write kernel? Maybe can start work on it sooner. If able to go from C to machine executable on the linux machine, can create a basic OS executable from that step.

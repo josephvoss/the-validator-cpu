@@ -1,0 +1,33 @@
+List of commands and usage syntax
+
+add value1 value2
+	Stores the sum of these into the accumulator
+add value1
+	Adds this value to the accumulator
+	(assembler will need to stuff the second value with 0xFF, the ACC address)
+add &value1 &value2
+	""	""
+add &value1
+	"" 	""
+sub value1 value2
+sub value1
+sub &value1 &value2
+sub &value1
+
+inv value1
+	inverts value1 and overwrites ACC with it
+inv value1 value2
+	UNDEFINED, don't use
+inv value1 &value2
+	Store inverted value1 into &value2?
+inv &value1 &value1
+	Store inverted value1 into &value2?
+
+mov &value1 &value2
+	Copy contents of &value1 into &value2
+mov value1 &value2
+	Store value1 into &value2
+
+jfe/l/g value1 &location
+	if value1 is equal to/less than/greater than 0, then set instruction pointer to &location
+	(add value to value comparators, without going through subtraction?)
