@@ -1,0 +1,1 @@
+Issue right now is interfacing with the memory. Control matrix needs to be able to identify if a given input is a memory address or an actual value. If it's a value, no issue. If it's a memory address, then the memory needs to be sent to the

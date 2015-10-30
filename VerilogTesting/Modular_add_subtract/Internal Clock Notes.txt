@@ -1,0 +1,20 @@
+Needs to be at a set clock delay. However, this increases execution time of each command for each module it includes. Can put all commands in one moldule to be executed at one clock pulse, but want to refactor everything to be easier to use. Maybe use internal clock signal? Would be subdividing the clock signal, requiring some components to work at faster rates than others, but if they can handle it (which in this case they can because it's an electronic simulation) then would maintain a constant 1 command per clock interface
+
+EXCEPT! Can use continuous assign to solve this problem, module doesn't need a clock input;
+EXCEPT! Other modules do. Doesn't solve the underlying problem that linking modules together is a clock issue.
+
+If modules are independent, fine to run in parallel
+If modules are linked human-centipede style, no issue. Just send inbetween signals
+
+clock->module1------>module2------>module3
+start	      start2 	    start3, etc
+
+But what is modules are linked together, like a submodule?
+
+clock->module1---->--------|
+          |             module2
+          |-------<--------|
+
+module1 needed to execute in one clock cycle, but module2 needs time to start and finish execution. Human centipede method doesn't work, execution cycle in module1 needs to wait for completion of execution cycle in module2. WAIT! So then the reason I can't implement this is a lack of a wait signal in module1? But they have thats! Breif stack overflow search shows I need fork & join, look into what these commmands do.
+
+Issue currently faced with linking the hypothetical/magical Control Matrix and the ALU, in addition to linking the ALU with the Left Shifter and Right Shifter. Lshift and Rshift modules aren't essential, and if need be can be implemented in the ALU, but thats an ugly code solution.
