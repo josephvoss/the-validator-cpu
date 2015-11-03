@@ -7,26 +7,27 @@ value1Out, //needed?
 value1Addy, //needed?
 value2Out,
 value2Addy,
-instructionPointer
+instructionPointer,
+ACC
 );
 
 input clock;
 input [23:0] commandIn;
 input [7:0] value1In, value2In; //only used if addy specified
-output [7:0] value1Out, value2Out, value1Addy, value2Addy, insturctionPointer;
+output [7:0] value1Out, value2Out, value1Addy, value2Addy, instructionPointer, ACC;
 
 wire clock;
 wire [23:0] commandIn;
 wire [7:0] value1In, value2In; //only used if addy specified
-reg [7:0] value1Out, value2Out, value1Addy, value2Addy, insturctionPointer;
+reg [7:0] value1Out, value2Out, value1Addy, value2Addy, instructionPointer, ACC;
 
 reg [5:0] commandCode;	
 reg [7:0] value1Internal, value2Internal;
 
 
-output [7:0] valueGetter;
+//output [7:0] valueGetter;
 reg [7:0] valueGetter;
-input [7:0] valueGot;
+//input [7:0] valueGot;
 wire [7:0] valueGot;
 
 reg value1AddyFlag, value2AddyFlag, overwriteOutput;
@@ -48,7 +49,7 @@ always @(posedge clock) begin
 //Parse Values
 //-----------------------------------------------------------------------------
 	value1AddyFlag = commandIn[17];
-	if value1AddyFlag begin
+	if (value1AddyFlag) begin
 		value1Addy = commandIn[16:9];
 		// Get value1 from memory using this addy
 		if (value1Addy == 8'b11111111) begin //ACC flag
@@ -61,7 +62,7 @@ always @(posedge clock) begin
 		value1Internal = commandIn[16:9];
 	end		
 	value2AddyFlag = commandIn[8];
-	if value2AddyFlag begin
+	if (value2AddyFlag) begin
 		value2Addy = commandIn[7:0];
 		// Get value2 from memory using this addy
 		if (value2Addy == 8'b11111111) begin //ACC flag
@@ -94,18 +95,18 @@ always @(posedge clock) begin
 		overwriteOutput = 1;
 	end
 	if (commandCode == 6'b000101) begin //jfe
-		if (value1 == 0) begin
-			instructionPointer = value2;
+		if (value1Internal == 0) begin
+			instructionPointer = value2Internal;
 		end	
 	end
 	if (commandCode == 6'b000110) begin //jfl
-		if (value1 < 0) begin
-			instructionPointer = value2;
+		if (value1Internal < 0) begin
+			instructionPointer = value2Internal;
 		end
 	end
 	if (commandCode == 6'b000111) begin //jfg
-		if (value1 > 0) begin
-			instructionPointer = value2;
+		if (value1Internal > 0) begin
+			instructionPointer = value2Internal;
 		end
 	end
 //--------------------------------------------------------------------------------
@@ -119,5 +120,6 @@ always @(posedge clock) begin
 		//value2Addy should still be valid
 	end
 //--------------------------------------------------------------------------------
-
 end
+
+endmodule
