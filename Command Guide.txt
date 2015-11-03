@@ -5,19 +5,49 @@ List of commands and usage syntax
 add
 	Operations desired
 	# + # = registerA 						8b + 8b + 4b = 20b minimum //? Would need to expand sentence length to add register flags. lin/lex need this too
-	# + registerA = registerB				8b + 4b + 4b = 16b minimum
 	registerA + # = registerB				4b + 8b + 4b = 16b minimum
 	registerA + registerB = registerC		4b + 4b + 4b = 12b minimum
+
+	Syntax (26 bit command)
+	|opcode|RegisterFlag|         Number1|RegisterFlag|         Number2|OutputRegister|
+	|  0001|           0|        01010101|           0|        00000001|          0100| = 00010010101010000000010100
+
+	|opcode|RegisterFlag|Buffer|Register1|RegisterFlag|Buffer|Register2|OutputRegister|
+	|  0001|           1|  0000|     0001|           1|  0000|     0010|          0011| = 00011000000011000000100011
+
+	|opcode|RegisterFlag|Buffer|Register1|RegisterFlag|          Number|OutputRegister|
+	|  0001|           1|  0000|     0001|			 0|        01010101|          0010| = 00011000000010010101010001
 
 	ISSUE! How to differentiate between a register value and a number value? Add register flags? Ugly but works
 	
 sub
-	Same operations desired as add command, look there
+	Operations desired
+	# - # = registerA 						8b + 8b + 4b = 20b minimum //? Would need to expand sentence length to add register flags. lin/lex need this too
+	registerA - # = registerB				4b + 8b + 4b = 16b minimum
+	registerA - registerB = registerC		4b + 4b + 4b = 12b minimum
+
+	Syntax (26 bit command)
+	|opcode|RegisterFlag|         Number1|RegisterFlag|         Number2|OutputRegister|
+	|  0010|           0|        01010101|           0|        00000001|          0100| = 00100010101010000000010100
+
+	|opcode|RegisterFlag|Buffer|Register1|RegisterFlag|Buffer|Register2|OutputRegister|
+	|  0010|           1|  0000|     0001|           1|  0000|     0010|          0011| = 00101000000011000000100011
+
+	|opcode|RegisterFlag|Buffer|Register1|RegisterFlag|          Number|OutputRegister|
+	|  0010|           1|  0000|     0001|			 0|        01010101|          0010| = 00101000000010010101010001
+
 
 inv
 	Operations desired
 	~# = registerA 							8b + 4b = 12b minimum
 	~registerA = registerB 					4b + 4b = 8b minimum
+
+	Syntax (17 bit command, buffer end)
+	|opcode|RegisterFlag|         Number|OutputRegister|
+	|  0011|           0|       00100100|          0001|
+
+	|opcode|RegisterFlag|Buffer|Register|OutputRegister|
+	|  0011| 	       1|  0000|    0001|          0010|
 
 //Can't lin and lex be combined into the mov command? Syntax is different for each one of them.
 lin (mtr?)
@@ -26,18 +56,35 @@ lin (mtr?)
 	mv addy registerA 						16b + 4b = 20b minimum
 	mv # registerA							8b + 4b = 12b minimum
 
+	Syntax (25 bit command)
+	|opcode|AddressFlag|          Address|OutputRegister|
+	|  0100| 		  1| 0000111100001111|          0001|
+
+	|opcode|AddressFlag|Buffer?|   Number|OutputRegister|
+	|  0100|          0|   0000| 00001111|          0001|
+ 
+
 lex (rtm?)
 	Load value from a register into memory
 	Operations desired
 	mv registerA addy						4b + 16b = 20b minimum
 	mv # addy								8b + 16b = 24b minimum //Necessary? Can load number into register then into memory
 																   //Decided unnecessary. Nix this
+	Syntax (25 bit command)
+	|opcode|RegisterFlag|Buffer|Register|   OutputAddress|
+	|  0101| 		   1|  0000|    0001|0000111100001111|
+
+	|opcode|RegisterFlag|	      Number|   OutputAddress|
+	|  0101| 		   0|       00010001|0000111100001111|
+
 jfe/l/g
 	Branching condition. If value1 is equal to/less than/greater than 0, then set instruction pointer to location
 	(add value to value comparators, without going through subtraction?)
 	(relies on returning execution here. Add jump return function?
-
 	Operations desired
 	#, address 								8b + 16b = 24b minimum //Necessary? Can load number into register then do comparison
 	registerA, address						4b + 16b = 20b minimum
 
+	Syntax (24 bit command)
+	|opcode|Register|   OutputAddress|
+	|  0110|    0001|0000111100001111|
