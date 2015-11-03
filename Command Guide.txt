@@ -1,33 +1,43 @@
 List of commands and usage syntax
 
-add value1 value2
-	Stores the sum of these into the accumulator
-add value1
-	Adds this value to the accumulator
-	(assembler will need to stuff the second value with 0xFF, the ACC address)
-add &value1 &value2
-	""	""
-add &value1
-	"" 	""
-sub value1 value2
-sub value1
-sub &value1 &value2
-sub &value1
+24 bit sentences still
 
-inv value1
-	inverts value1 and overwrites ACC with it
-inv value1 value2
-	UNDEFINED, don't use
-inv value1 &value2
-	Store inverted value1 into &value2?
-inv &value1 &value1
-	Store inverted value1 into &value2?
+add
+	Operations desired
+	# + # = registerA 						8b + 8b + 4b = 20b minimum //? Would need to expand sentence length to add register flags. lin/lex need this too
+	# + registerA = registerB				8b + 4b + 4b = 16b minimum
+	registerA + # = registerB				4b + 8b + 4b = 16b minimum
+	registerA + registerB = registerC		4b + 4b + 4b = 12b minimum
 
-mov &value1 &value2
-	Copy contents of &value1 into &value2
-mov value1 &value2
-	Store value1 into &value2
+	ISSUE! How to differentiate between a register value and a number value? Add register flags? Ugly but works
+	
+sub
+	Same operations desired as add command, look there
 
-jfe/l/g value1 &location
-	if value1 is equal to/less than/greater than 0, then set instruction pointer to &location
+inv
+	Operations desired
+	~# = registerA 							8b + 4b = 12b minimum
+	~registerA = registerB 					4b + 4b = 8b minimum
+
+//Can't lin and lex be combined into the mov command? Syntax is different for each one of them.
+lin (mtr?)
+	Load value from memory into a register
+	Operations desired
+	mv addy registerA 						16b + 4b = 20b minimum
+	mv # registerA							8b + 4b = 12b minimum
+
+lex (rtm?)
+	Load value from a register into memory
+	Operations desired
+	mv registerA addy						4b + 16b = 20b minimum
+	mv # addy								8b + 16b = 24b minimum //Necessary? Can load number into register then into memory
+																   //Decided unnecessary. Nix this
+jfe/l/g
+	Branching condition. If value1 is equal to/less than/greater than 0, then set instruction pointer to location
 	(add value to value comparators, without going through subtraction?)
+	(relies on returning execution here. Add jump return function?
+
+	Operations desired
+	#, address 								8b + 16b = 24b minimum //Necessary? Can load number into register then do comparison
+	registerA, address						4b + 16b = 20b minimum
+
