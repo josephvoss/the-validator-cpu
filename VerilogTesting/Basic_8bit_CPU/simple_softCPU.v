@@ -12,18 +12,17 @@ input clock;
 input [25:0] instruction;
 
 //Memory interfaces, attaches to chips, NOT THE USERS
-output [16:0] instructionPointer;
+output [15:0] instructionPointer;
 input [7:0] valueIn; 
 input [15:0] addressIn;
 output [7:0] valueOut;
 output [15:0] addressOut;
 
 wire clock;
-wire [23:0] instruction;
 wire [7:0] valueIn;
-//Don't give them names, make a nested data bus? 
-reg [7:0] valueOut, value1Internal, value2Internal, registerA, registerB, registerC, registerD, registerE, registerF, registerG, registerH, registerI, registerJ, registerK, registerL, registerM, registerN, registerO, registerP;
-reg [16:0] value1Addy, value2Addy, instructionPointer;
+//Don't give them names, make a nested data bus? Impossiburu in verilog
+reg [7:0] valueOut, value1Internal, value2Internal, value3Internal, registerA, registerB, registerC, registerD, registerE, registerF, registerG, registerH, registerI, registerJ, registerK, registerL, registerM, registerN, registerO, registerP;
+reg [15:0] value1Addy, value2Addy, instructionPointer;
 
 reg [3:0] commandCode;	
 
@@ -60,7 +59,7 @@ end
 		//valueInternalSelector = #; //Pick which valueInternal to use
 		//registerSelector = #; //Select which register to store valueInternal
 		
-always(*) begin
+always@(*) begin
 	//Write data from Registers to valueInternals
 	if (writeToReg == 0) begin
 		if (registerSelector == 4'b0000) begin
@@ -94,7 +93,7 @@ always(*) begin
 		end else if (registerSelector == 4'b1110) begin
 			tempValueInternal = registerO;
 		end else if (registerSelector == 4'b1111) begin
-			tempValueInternal = regsiterP;
+			tempValueInternal = registerP;
 		end
 		if (valueInternalSelector == 1) begin
 			value1Internal = tempValueInternal;
@@ -146,9 +145,9 @@ always(*) begin
 		end else if (registerSelector == 4'b1110) begin
 			registerO = tempValueInternal;
 		end else if (registerSelector == 4'b1111) begin
-			regsiterP = tempValueInternal;
+			registerP = tempValueInternal;
 		end
-
+	end
 end
 
 always @(posedge clock) begin
@@ -189,22 +188,22 @@ always @(posedge clock) begin
 			valueInternalSelector = 1;
 			registerSelector = instruction[16:13]; //set value1Internal to register
 			//value1Internal set by the always(*) block
-		end else
+			end
+		else
 			value1Internal = instruction[20:13];
-		end
 		if (instruction[12]) begin
 			//parse register info
 			valueInternalSelector = 2;
 			registerSelector = instruction[7:4];
 			//value2Internal set by the always(*) block
-		end else
-			value2Internal = instruction[11:4];
-		end
+			end
+		else
+			value2Internal <= instruction[11:4];
 		value3Internal = value1Internal + value2Internal;
 		//Now store value3Internal in the register
 		writeToReg = 1;
 		registerSelector = instruction[3:0];
-		valueSelector = 3;
+		valueInternalSelector = 3;
 	end
 
 
