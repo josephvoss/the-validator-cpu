@@ -24,14 +24,13 @@ wire [7:0] valueIn;
 reg [7:0] valueOut, value1Internal, value2Internal, value3Internal, registerA, registerB, registerC, registerD, registerE, registerF, registerG, registerH, registerI, registerJ, registerK, registerL, registerM, registerN, registerO, registerP;
 reg [15:0] value1Addy, value2Addy, instructionPointer;
 
-reg [3:0] commandCode;	
+reg [3:0] commandCode;
 
 //Register Selector Block
 reg addyFlag, reg1Flag, reg2Flag; //needed?
-reg [4:0] registerSelector;
-reg [3:0] valueInternalSelector;
-reg [7:0] tempValueInternal;
-reg writeToReg;
+//reg [4:0] registerSelector;
+//reg [3:0] valueInternalSelector;
+//reg [7:0] tempValueInternal;
 /*
 	Command format
 	
@@ -59,159 +58,128 @@ end
 		//valueInternalSelector = #; //Pick which valueInternal to use
 		//registerSelector = #; //Select which register to store valueInternal
 		
-always@(*) begin
-	//Write data from Registers to valueInternals
-	if (writeToReg == 0) begin
-		if (registerSelector == 4'b0000) begin
-			tempValueInternal = registerA;
-		end else if (registerSelector == 4'b0001) begin
-			tempValueInternal = registerB;
-		end else if (registerSelector == 4'b0010) begin
-			tempValueInternal = registerC;
-		end else if (registerSelector == 4'b0011) begin
-			tempValueInternal = registerD;
-		end else if (registerSelector == 4'b0100) begin
-			tempValueInternal = registerE;
-		end else if (registerSelector == 4'b0101) begin
-			tempValueInternal = registerF;
-		end else if (registerSelector == 4'b0110) begin
-			tempValueInternal = registerG;
-		end else if (registerSelector == 4'b0111) begin
-			tempValueInternal = registerH;
-		end else if (registerSelector == 4'b1000) begin
-			tempValueInternal = registerI;
-		end else if (registerSelector == 4'b1001) begin
-			tempValueInternal = registerJ;
-		end else if (registerSelector == 4'b1010) begin
-			tempValueInternal = registerK;
-		end else if (registerSelector == 4'b1011) begin
-			tempValueInternal = registerL;
-		end else if (registerSelector == 4'b1100) begin
-			tempValueInternal = registerM;
-		end else if (registerSelector == 4'b1101) begin
-			tempValueInternal = registerN;
-		end else if (registerSelector == 4'b1110) begin
-			tempValueInternal = registerO;
-		end else if (registerSelector == 4'b1111) begin
-			tempValueInternal = registerP;
-		end
-		if (valueInternalSelector == 1) begin
-			value1Internal = tempValueInternal;
-		end else if (valueInternalSelector == 2) begin
-			value2Internal = tempValueInternal;
-		end else if (valueInternalSelector == 3) begin
-			value3Internal = tempValueInternal;
-		end
 
-	//Write data from valueInternals to Registers
-	end else if (writeToReg) begin
-		//Select value to use first!
-		if (valueInternalSelector == 1) begin
-			tempValueInternal = value1Internal;
-		end else if (valueInternalSelector == 2) begin
-			tempValueInternal = value2Internal;
-		end else if (valueInternalSelector == 3) begin
-			tempValueInternal = value3Internal;
-		end
-
-		if (registerSelector == 4'b0000) begin
-			tempValueInternal = registerA;
-		end else if (registerSelector == 4'b0001) begin
-			registerB = tempValueInternal;
-		end else if (registerSelector == 4'b0010) begin
-			registerC = tempValueInternal;
-		end else if (registerSelector == 4'b0011) begin
-			registerD = tempValueInternal;
-		end else if (registerSelector == 4'b0100) begin
-			registerE = tempValueInternal;
-		end else if (registerSelector == 4'b0101) begin
-			registerF = tempValueInternal;
-		end else if (registerSelector == 4'b0110) begin
-			registerG = tempValueInternal;
-		end else if (registerSelector == 4'b0111) begin
-			registerH = tempValueInternal;
-		end else if (registerSelector == 4'b1000) begin
-			registerI = tempValueInternal;
-		end else if (registerSelector == 4'b1001) begin
-			registerJ = tempValueInternal;
-		end else if (registerSelector == 4'b1010) begin
-			registerK = tempValueInternal;
-		end else if (registerSelector == 4'b1011) begin
-			registerL = tempValueInternal;
-		end else if (registerSelector == 4'b1100) begin
-			registerM = tempValueInternal;
-		end else if (registerSelector == 4'b1101) begin
-			registerN = tempValueInternal;
-		end else if (registerSelector == 4'b1110) begin
-			registerO = tempValueInternal;
-		end else if (registerSelector == 4'b1111) begin
-			registerP = tempValueInternal;
-		end
-	end
+//Write data from Registers to valueInternals
+task regToValue;
+input [3:0] registerSelector;
+input [3:0] valueInternalSelector;
+reg [7:0] tempValueInternal;
+begin
+	if (registerSelector == 4'b0000) 
+		tempValueInternal = registerA;
+	else if (registerSelector == 4'b0001)
+		tempValueInternal = registerB;
+	else if (registerSelector == 4'b0010)
+		tempValueInternal = registerC;
+	else if (registerSelector == 4'b0011)
+		tempValueInternal = registerD;
+	else if (registerSelector == 4'b0100)
+		tempValueInternal = registerE;
+	else if (registerSelector == 4'b0101)
+		tempValueInternal = registerF;
+	else if (registerSelector == 4'b0110)
+		tempValueInternal = registerG;
+	else if (registerSelector == 4'b0111)
+		tempValueInternal = registerH;
+	else if (registerSelector == 4'b1000)
+		tempValueInternal = registerI;
+	else if (registerSelector == 4'b1001)
+		tempValueInternal = registerJ;
+	else if (registerSelector == 4'b1010)
+		tempValueInternal = registerK;
+	else if (registerSelector == 4'b1011)
+		tempValueInternal = registerL;
+	else if (registerSelector == 4'b1100)
+		tempValueInternal = registerM;
+	else if (registerSelector == 4'b1101)
+		tempValueInternal = registerN;
+	else if (registerSelector == 4'b1110)
+		tempValueInternal = registerO;
+	else if (registerSelector == 4'b1111)
+		tempValueInternal = registerP;
+		
+	if (valueInternalSelector == 1)
+		value1Internal = tempValueInternal;
+	else if (valueInternalSelector == 2)
+		value2Internal = tempValueInternal;
+	else if (valueInternalSelector == 3)
+		value3Internal = tempValueInternal;
 end
+endtask
+
+//Write data from valueInternals to Registers
+task valueToReg;
+input [3:0] valueInternalSelector;
+input [3:0] registerSelector;
+reg [7:0] tempValueInternal;
+begin
+	if (valueInternalSelector == 1)
+		tempValueInternal = value1Internal;
+	 else if (valueInternalSelector == 2)
+		tempValueInternal = value2Internal;
+	 else if (valueInternalSelector == 3)
+		tempValueInternal = value3Internal;
+
+	if (registerSelector == 4'b0000)
+		tempValueInternal = registerA;
+	else if (registerSelector == 4'b0001)
+		registerB = tempValueInternal;
+	else if (registerSelector == 4'b0010)
+		registerC = tempValueInternal;
+	else if (registerSelector == 4'b0011)
+		registerD = tempValueInternal;
+	else if (registerSelector == 4'b0100)
+		registerE = tempValueInternal;
+	else if (registerSelector == 4'b0101)
+		registerF = tempValueInternal;
+	else if (registerSelector == 4'b0110)
+		registerG = tempValueInternal;
+	else if (registerSelector == 4'b0111)
+		registerH = tempValueInternal;
+	else if (registerSelector == 4'b1000)
+		registerI = tempValueInternal;
+	else if (registerSelector == 4'b1001)
+		registerJ = tempValueInternal;
+	else if (registerSelector == 4'b1010)
+		registerK = tempValueInternal;
+	else if (registerSelector == 4'b1011)
+		registerL = tempValueInternal;
+	else if (registerSelector == 4'b1100)
+		registerM = tempValueInternal;
+	else if (registerSelector == 4'b1101)
+		registerN = tempValueInternal;
+	else if (registerSelector == 4'b1110)
+		registerO = tempValueInternal;
+	else if (registerSelector == 4'b1111)
+		registerP = tempValueInternal;
+end
+endtask
 
 always @(posedge clock) begin
 
 	commandCode = instruction[25:22];
 
-//Parse Values
-//-----------------------------------------------------------------------------
-
-//this should probably be done later
-/*
-	if (commandCode == 4'b0101) begin
-			registerSelector = instruction[23:20];
-			regFlag = 1;
-	end else if (commandCode == 4'b0100 && instruction[22] && instruction[21]) begin
-			registerSelector = instruction[20:17];
-			regFlag = 1;
-	end else if (!commandCode[3] && instruction[22]) begin
-			registerSelector = instruction[17:13];
-			regFlag = 1;
-	end
-*/
-	//what about the multiple registers for add and sub? And output registers?
-
-
-//--------------------------------------------------------------------------------
-
 	instructionPointer = instructionPointer + 1;
-	writeToReg = 0;
-
-//Parse Command Code and do Calculation
-//--------------------------------------------------------------------------------
 
 	//Add command
 	if (commandCode == 4'b0001) begin
 		if (instruction[21]) begin
-			//parse register info
-			valueInternalSelector = 1;
-			registerSelector = instruction[16:13]; //set value1Internal to register
+			regToValue(instruction[16:13], 1);
 			//value1Internal set by the always(*) block
-			end
+		end
 		else
 			value1Internal = instruction[20:13];
-		if (instruction[12]) begin
-			//parse register info
-			valueInternalSelector = 2;
-			registerSelector = instruction[7:4];
+		if (instruction[12]) begin 
+			regToValue(instruction[7:4], 2);
 			//value2Internal set by the always(*) block
-			end
+		end
 		else
-			value2Internal <= instruction[11:4];
+			value2Internal = instruction[11:4];
 		value3Internal = value1Internal + value2Internal;
 		//Now store value3Internal in the register
-		writeToReg = 1;
-		registerSelector = instruction[3:0];
-		valueInternalSelector = 3;
+		valueToReg(3, instruction[3:0]);
 	end
 
-
-//--------------------------------------------------------------------------------
-
-//Output value
-//--------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------
 end
 
 endmodule
