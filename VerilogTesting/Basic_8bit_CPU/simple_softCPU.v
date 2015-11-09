@@ -28,16 +28,11 @@ reg [3:0] commandCode;
 
 //Register Selector Block
 reg addyFlag, reg1Flag, reg2Flag; //needed?
-//reg [4:0] registerSelector;
-//reg [3:0] valueInternalSelector;
-//reg [7:0] tempValueInternal;
 /*
 	Command format
 	
-	Message is 26 bits long
-	First 6 bits are command code, next 18 are 9 each for value 1 and value 2
-		left stuffed with 1 bit address flag. Flag is on if the value is an 
-		address and not an value.
+	Message is 26 bits long. Specific syntax varies per command
+	See Command\ Guide.txt for details
 	
 */
 
@@ -115,13 +110,13 @@ reg [7:0] tempValueInternal;
 begin
 	if (valueInternalSelector == 1)
 		tempValueInternal = value1Internal;
-	 else if (valueInternalSelector == 2)
+	else if (valueInternalSelector == 2)
 		tempValueInternal = value2Internal;
-	 else if (valueInternalSelector == 3)
+	else if (valueInternalSelector == 3)
 		tempValueInternal = value3Internal;
 
 	if (registerSelector == 4'b0000)
-		tempValueInternal = registerA;
+		registerA = tempValueInternal;
 	else if (registerSelector == 4'b0001)
 		registerB = tempValueInternal;
 	else if (registerSelector == 4'b0010)
@@ -178,6 +173,57 @@ always @(posedge clock) begin
 		value3Internal = value1Internal + value2Internal;
 		//Now store value3Internal in the register
 		valueToReg(3, instruction[3:0]);
+	end
+
+	//Sub command
+	//COMBINE WITH ABOVE? Identical except for - instead of +
+	else if (commandCode == 4'b0011) begin	
+		if (instruction[21]) begin
+			regToValue(instruction[16:13], 1);
+			//value1Internal set by the always(*) block
+		end
+		else
+			value1Internal = instruction[20:13];
+		if (instruction[12]) begin 
+			regToValue(instruction[7:4], 2);
+			//value2Internal set by the always(*) block
+		end
+		else
+			value2Internal = instruction[11:4];
+		value3Internal = value1Internal - value2Internal;
+		//Now store value3Internal in the register
+		valueToReg(3, instruction[3:0]);
+	end
+
+	//Inv command
+	else if (commandCode == 4'b0010) begin
+		if (instruction[21]) 
+			regToValue(instruction[16:13], 1);
+		else
+			value1Internal = instruction[20:13];
+		value3Internal = ~value1Internal;
+		valueToReg(3, instruction[3:0]);
+	end		
+
+	//Jfl command
+	else if (commandCode == 4'b0101) begin
+		regToValue(instruction[21:18], 1);
+		if (value1Internal[7])
+			instructionPointer = instruction[17:2];
+	end
+
+	//Jfe command
+	else if (commandCode == 4'b0110) begin
+		regToValue(instruction[21:18], 1);
+		if (value1Internal == 0)
+			instructionPointer = instruction[17:2];
+	end
+
+	//Jfg command
+	else if (commandCode == 4'b0111) begin
+		regToValue(instruction[21:18], 1);
+		if (value1Internal > 0 && !value1Internal[7])
+			instructionPointer = instruction[17:2];
 	end
 
 end
