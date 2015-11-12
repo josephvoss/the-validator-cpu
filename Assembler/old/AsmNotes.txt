@@ -27,20 +27,20 @@ CPU needs to be modified to
 
 Vasm syntax
 
-	Label first; //set this address of this location to first, start of the executable + line number; rn assume start of exec is 0
-	int aValue = 1; //stores 1 into a new address referenced by aValue. aValue now has an address that stores a value
-	int bValue = 2;
-	add aValue bValue; //Add aValue and bValue, store result in ACC
-	mov ACC &aValue; //Copy value from ACC and store it in the same location as aValue
-	sub aValue ACC; //set ACC to a 'unknown value' in this case 0;
-	int compareValue = ACC; //set compareValue to ACC, too complex? If so
-	int compareValue;
-	mov ACC &compareValue;
-	jfl compareValue first; //check if compareValue < 0; go to first if true;
+	lbl first; //set this address of this location to first, start of the executable + line number; rn assume start of exec is 0
+	mov 5 regA; //stores 5 into register A
+	add regA 0 regB; //copies register A into register B
+	add regA 3 regA; //adds 3 to register A
+
+	sub regA regB regC;
+	mov regC 0x4f; //store regC into a disk value. Should the address be a variable name?
+
+	sub regB regA regC
+
+	jfl regC first; //check if regC < 0; go to first if true;
 
 Potential modifications to vasm
-	- Have add & sub be teritary: store value in third value
-		could just define this in vasm and not modify the CPU code at all, add with 3 values calls a function
+	- Variable names? Initialize each with int, store 9 bit address. Do after a basic assembler is built
 	- Define functions?
 	- characters/floating point values-currently only handles integer math
 

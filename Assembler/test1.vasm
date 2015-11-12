@@ -1,0 +1,8 @@
+add 0 0 regA ; //init A
+add 20 0 regB ; //set B to 20
+add 0 0 regC ; //init C
+lbl start ;
+add regA 5 regA ; //A =+ 5
+add regC 1 regC ; //Counter++
+sub regA regB regD ; //Compare = A - B
+jfl regD start ; //if A-B < 0, go to start
