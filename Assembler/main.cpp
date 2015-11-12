@@ -21,8 +21,8 @@ std::string commandWordParser(std::string commandIn)
 {
 	std::string output;
 	if (commandIn == "add") output = "0001";
-	else if (commandIn == "sub") output = "0010";
-	else if (commandIn == "inv") output = "0011";
+	else if (commandIn == "sub") output = "0011";
+	else if (commandIn == "inv") output = "0010";
 	else if (commandIn == "mov") output = "0100";
 	else if (commandIn == "jfl") output = "0101";
 	else if (commandIn == "jfe") output = "0110";
