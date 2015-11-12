@@ -15,6 +15,7 @@
 //Make it a 2 pass, resolve label names
 //Label map needs offset address, not line counter
 //Have ';' OR ' ' be the end of each value parsing, currently requires lines to end with ' ;'
+//functions?
 
 std::string commandWordParser(std::string commandIn)
 {
@@ -141,6 +142,7 @@ int main(int argc, char* argv[])
 	std::string assemblyLine, commandWord, value1Word, value2Word, value3Word;
 	std::string command, value1, value2, value3;
 	int valueCounter = 0;
+	size_t endOfSearch;
 	std::map<std::string, std::string> labelMap;
 	
 	//pass 1
@@ -148,13 +150,14 @@ int main(int argc, char* argv[])
 	while(std::getline(inputFile, line) && validInput)
 	{
 		//removing comments	
-		try{line.erase(line.find("//"), std::string::npos);}
-		catch(...){std::cout<<"No comments on this line"<<std::endl;}
+		try{
+			line.erase(line.find("//"), std::string::npos);
+			std::cout<<"Comment Found"<<std::endl;
+			}
+		catch(...){}//std::cout<<"No comments on this line"<<std::endl;}
 		originalLine = line;
 
 		//parsing
-		//if(line.find(';') == NULL) throw;
-		//line.erase(0, line.find(';'));
 		command = line.substr(0, line.find(' '));
 		line.erase(0, line.find(' ')+1);
 		valueCounter = 0;
@@ -163,13 +166,15 @@ int main(int argc, char* argv[])
 		valueCounter++;
 		line.erase(0, line.find(' ')+1);
 		if (command == "lbl")
+		{
 			labelMap[value1] = std::bitset<16>(lineCounter).to_string(); //should this be the address to jump to?
+			std::cout<<"Label found"<<std::endl;
+		}
 		else
 		{
 			tempFileOut << originalLine << std::endl;
 			commandLineCounter++;
 		}
-		if (line == ";") std::cout<<"End of line " <<lineCounter<<" reached\n";
 	}	
 	
 	//pass 2
@@ -203,10 +208,6 @@ int main(int argc, char* argv[])
 			}
 			catch(...)
 			{
-				if(command == "lbl")
-				{
-					labelMap[value1] = std::bitset<16>(lineCounter).to_string(); //should this be the address to jump to?
-				}
 				if (line == ";") std::cout<<"End of line " <<lineCounter<<" reached\n";
 			}
 			
@@ -252,5 +253,9 @@ int main(int argc, char* argv[])
 			std::cout<<"Malformed statement at line "<<lineCounter<<std::endl;;
 		}
 		lineCounter += 1;
-	}	
+	}
+
+	std::cout<<"Deleting temporary file"<<std::endl;
+	std::remove("./temp");
+	std::cout<<"Assembly completed"<<std::endl;
 }
