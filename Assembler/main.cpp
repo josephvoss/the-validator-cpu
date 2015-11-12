@@ -14,6 +14,7 @@
 //Generate valid command sentences. Possibly change command sentence structure
 //Make it a 2 pass, resolve label names
 //Label map needs offset address, not line counter
+//Have ';' OR ' ' be the end of each value parsing, currently requires lines to end with ' ;'
 
 std::string commandWordParser(std::string commandIn)
 {
@@ -83,8 +84,8 @@ std::string valueToWord(std::string value, std::map<std::string,std::string> &la
 	{
 		try
 		{
-			wordNum = std::stoi(word, NULL, 0);
-			if (wordNum < 255 && wordNum > 0) //if 8 bit. If value should actually be 16 bit can buffer it in the mov function
+			wordNum = std::stoi(value, NULL, 0);
+			if (wordNum < 255 && wordNum >= 0) //if 8 bit. If value should actually be 16 bit can buffer it in the mov function
 				word = std::bitset<9>(wordNum).to_string(); //includes register bit set to 0
 			else
 				word = std::bitset<16>(wordNum).to_string();
@@ -96,7 +97,7 @@ std::string valueToWord(std::string value, std::map<std::string,std::string> &la
 	}
 	if (word == "LONGERROR")
 	{
-		word = labelMap[word];
+		word = labelMap[value];
 		if (word == "")
 			word = "LONGERROR";
 	}
@@ -116,12 +117,15 @@ int main(int argc, char* argv[])
 	if (argc == 2) argv[2] = (char*) "./a.out";
 
 	std::ifstream inputFile;
+	std::ifstream tempFileIn;
+	std::ofstream tempFileOut;
 	std::ofstream outputFile;
 
 	try
 	{
 		inputFile.open(argv[1]);
 		outputFile.open(argv[2]);
+		tempFileOut.open("./tempFile");
 	}
 	catch(...)
 	{
@@ -130,22 +134,49 @@ int main(int argc, char* argv[])
 	}
 
 	size_t lengthOfLine;
-	std::string line;
+	std::string line, originalLine;
 
 	int lineCounter = 1;
+	int commandLineCounter = 0; //0 indexed
 	std::string assemblyLine, commandWord, value1Word, value2Word, value3Word;
 	std::string command, value1, value2, value3;
 	int valueCounter = 0;
 	std::map<std::string, std::string> labelMap;
 	
-	//Correct syntax
-	// lbl value1
-	// add/sub value1 value2 value3;
-	// mov value1 value2
-	// inv value1 value2
-	// jf  value1 value2
-	// int var = 0;?
-	while(std::getline(inputFile, line) && validInput && line != ";")
+	//pass 1
+	std::cout << "Pass 1" <<std::endl;
+	while(std::getline(inputFile, line) && validInput)
+	{
+		//removing comments	
+		try{line.erase(line.find("//"), std::string::npos);}
+		catch(...){std::cout<<"No comments on this line"<<std::endl;}
+		originalLine = line;
+
+		//parsing
+		//if(line.find(';') == NULL) throw;
+		//line.erase(0, line.find(';'));
+		command = line.substr(0, line.find(' '));
+		line.erase(0, line.find(' ')+1);
+		valueCounter = 0;
+		value1 = line.substr(0, line.find(' ')); //what if ends with;? can use ' ;' and endl synatx?
+		value1Word = valueToWord(value1, labelMap);
+		valueCounter++;
+		line.erase(0, line.find(' ')+1);
+		if (command == "lbl")
+			labelMap[value1] = std::bitset<16>(lineCounter).to_string(); //should this be the address to jump to?
+		else
+		{
+			tempFileOut << originalLine << std::endl;
+			commandLineCounter++;
+		}
+		if (line == ";") std::cout<<"End of line " <<lineCounter<<" reached\n";
+	}	
+	
+	//pass 2
+	tempFileOut.close();
+	tempFileIn.open("./tempFile");
+	std::cout << "Pass 2" <<std::endl;
+	while(std::getline(tempFileIn, line) && validInput)
 	{
 		try
 		{
@@ -168,13 +199,13 @@ int main(int argc, char* argv[])
 				value3 = line.substr(0, line.find(' '));//endline instead?
 				value3Word = valueToWord(value3, labelMap);
 				valueCounter++;
-				//erase is unnecessary, line not used
+				line.erase(0, line.find(' ')+1);
 			}
 			catch(...)
 			{
 				if(command == "lbl")
 				{
-					labelMap[value1] = std::to_string(lineCounter); //should this be the address to jump to?
+					labelMap[value1] = std::bitset<16>(lineCounter).to_string(); //should this be the address to jump to?
 				}
 				if (line == ";") std::cout<<"End of line " <<lineCounter<<" reached\n";
 			}
@@ -187,7 +218,7 @@ int main(int argc, char* argv[])
 			{
 				if (valueCounter != 3)
 					std::cout<<"Wrong number of arguements for command on line "<<lineCounter<<std::endl;
-				assemblyLine = commandWord + value1Word + value2Word + value3Word.substr(6,4) + "\n"; //don't include first 5 bits for word 3
+				assemblyLine = commandWord + value1Word + value2Word + value3Word.substr(5,4) + "\n"; //don't include first 5 bits for word 3
 			}
 
 			if (command == "lbl")
@@ -201,16 +232,16 @@ int main(int argc, char* argv[])
 			}
 
 			if (command == "inv")
-				assemblyLine = commandWord + value1Word + value2Word.substr(6,4) + "000000000";
+				assemblyLine = commandWord + value1Word + value2Word.substr(5,4) + "000000000";
 
 			if (command == "mov");
 
 			if (command == "jfl" || command == "jfe" || command == "jfg")
 			{
 				if (value2Word.length() < 16)
-					assemblyLine = commandWord + value1Word + "00000000" + value2Word + "00";
+					assemblyLine = commandWord + value1Word.substr(5,4) + "00000000" + value2Word + "00";
 				else
-					assemblyLine = commandWord + value1Word + value2Word + "00";
+					assemblyLine = commandWord + value1Word.substr(5,4) + value2Word + "00";
 			}
 			outputFile << assemblyLine;
 			std::cout<<"Line "<<lineCounter<<" successfully parsed"<<std::endl;
