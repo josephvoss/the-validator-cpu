@@ -4,8 +4,10 @@ instruction,
 instructionPointer,
 addressIn,
 valueIn,
+readValueIn,
 addressOut,
-valueOut
+valueOut,
+writeValueOut
 );
 
 input clock;
@@ -14,15 +16,19 @@ input [25:0] instruction;
 //Memory interfaces, attaches to chips, NOT THE USERS
 output [15:0] instructionPointer;
 input [7:0] valueIn; 
-input [15:0] addressIn;
+output [15:0] addressIn;
 output [7:0] valueOut;
 output [15:0] addressOut;
+output readValueIn, writeValueOut;
 
 wire clock;
 wire [7:0] valueIn;
 //Don't give them names, make a nested data bus? Impossiburu in verilog
 reg [7:0] valueOut, value1Internal, value2Internal, value3Internal, registerA, registerB, registerC, registerD, registerE, registerF, registerG, registerH, registerI, registerJ, registerK, registerL, registerM, registerN, registerO, registerP;
 reg [15:0] value1Addy, value2Addy, instructionPointer;
+
+reg readValueIn, writeValueOut;
+reg [15:0] addressIn, addressOut;
 
 reg [3:0] commandCode;
 
@@ -38,6 +44,8 @@ reg addyFlag, reg1Flag, reg2Flag; //needed?
 
 initial begin
 	instructionPointer <= 0;
+	readValueIn <= 0;
+	writeValueOut <= 0;
 end
 
 //Register Selector Block
@@ -152,9 +160,11 @@ endtask
 
 always @(posedge clock) begin
 
+	#4//delay for memory instruction reading in
+
 	commandCode = instruction[25:22];
 
-	instructionPointer = instructionPointer + 1;
+	instructionPointer = instructionPointer + 3; //instruction is 3 bytes long
 
 	//Add command
 	if (commandCode == 4'b0001) begin
@@ -203,7 +213,31 @@ always @(posedge clock) begin
 			value1Internal = instruction[20:13];
 		value3Internal = ~value1Internal;
 		valueToReg(3, instruction[3:0]);
-	end		
+	end	
+
+	//Mov commad
+	else if (commandCode == 4'b0100) begin
+		if (instruction[21]) begin //read value from mem
+			if (instruction[20]) begin
+				readValueIn = 1;
+				addressIn = instruction[19:3]; //addy in or addy out?
+				#1 value1Internal = valueIn; //wait for value to be fetched
+				readValueIn = 0;
+			end
+			else
+				value1Internal = instruction[11:3];
+			valueToReg(value1Internal, instruction[3:0]);
+		end
+		else if (instruction[20]) begin
+			//write value to memory
+			if (instruction[20]) begin //write value from reg
+				writeValueOut = 1;
+				regToValue(instruction[19:15], 1);
+				valueOut = value1Internal;
+				addressOut = instruction[15:0]; //addy in or addy out?
+			end
+		end
+	end
 
 	//Jfl command
 	else if (commandCode == 4'b0101) begin
