@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 		line.erase(0, line.find(' ')+1);
 		if (command == "lbl")
 		{
-			labelMap[value1] = std::bitset<16>(lineCounter).to_string(); //should this be the address to jump to?
+			labelMap[value1] = std::bitset<16>(3*(commandLineCounter+1)).to_string(); //should this be the address to jump to?
 			std::cout<<"Label found"<<std::endl;
 		}
 		else
@@ -256,6 +256,6 @@ int main(int argc, char* argv[])
 	}
 
 	std::cout<<"Deleting temporary file"<<std::endl;
-	std::remove("./temp");
+	std::remove("./tempFile");
 	std::cout<<"Assembly completed"<<std::endl;
 }
