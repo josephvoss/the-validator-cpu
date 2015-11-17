@@ -4,10 +4,11 @@ module softCPU_testbench;
 reg clock;
 reg [25:0] instruction;
 wire [15:0] instructionPointer;
-reg [15:0] addressIn;
+wire [15:0] addressIn;
 reg [7:0] valueIn;
 wire [15:0] addressOut;
 wire [7:0] valueOut;
+wire readValueIn, writeValueOut;
 
 always begin
 	#1 clock = !clock;
@@ -133,6 +134,6 @@ initial begin
 	$finish();
 end
 
-control_matrix softCPU(clock, instruction, instructionPointer, addressIn, valueIn, addressOut, valueOut);
+control_matrix softCPU(clock, instruction, instructionPointer, addressIn, valueIn, radValueIn, addressOut, valueOut, writeValueOut);
 
 endmodule	
